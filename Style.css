@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  background-color: black;
+  color: white;
+
+  height: 100vh;
+  overflow: hidden;
+}
+
+#gameUI {
+  display: grid;
+
+  height: 100vh;
+
+  grid-template-rows:
+    1fr
+    200px
+    80px;
+
+  font-family: "Press Start 2P", cursive;
+}
+
+#enemyPanel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#characterPanel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#dialoguePanel {
+  display: flex;
+
+  align-items: center;
+  border-width: 2px;
+  border-color: white;
+}
+
+#actionPanel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.actionButton {
+  font-family: "Press Start 2P", cursive;
+  color: white;
+  background-color: black;
+  border-width: 2px;
+  border-color: white;
+  padding: 5px;
+  margin-bottom: 20px;
+}
