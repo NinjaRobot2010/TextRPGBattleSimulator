@@ -1,3 +1,5 @@
+import { Character } from "./classes.js";
+
 export class Battle {
   constructor({
     party,
@@ -89,5 +91,28 @@ export class Battle {
 
   selectTargets(targets) {
     this.selectedTargets = targets;
+  }
+
+  clearStatusEffectModifiers() {
+    for (let key of Object.keys(this.currentActor.statusEffectModifiers)) {
+      this.currentActor.statusEffectModifiers[key] = 0;
+    }
+  }
+
+  processStatusEffects() {
+    for (const statusEffect of this.currentActor.statusEffects) {
+      const statusEffects = this.currentActor.statusEffects;
+      statusEffect.activate(this);
+      statusEffect.duration -= 1;
+      if (statusEffect.duration <= 0) {
+        statusEffects.splice(statusEffects.indexOf(statusEffect), 1);
+      }
+    }
+  }
+
+  checkIfCurrentActorDead() {
+    if (this.currentActor.health <= 0) {
+      this.changeActor();
+    }
   }
 }

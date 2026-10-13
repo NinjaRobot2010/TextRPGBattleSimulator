@@ -16,7 +16,10 @@ export class Character {
     attack = 0,
     defense = 0,
     statusEffects = [],
-    modifiers = {},
+    statusEffectModifiers = {
+      attack: 0,
+      defense: 0,
+    },
   } = {}) {
     this.name = name;
 
@@ -33,7 +36,7 @@ export class Character {
     this.defense = defense;
 
     this.statusEffects = statusEffects;
-    this.modifiers = modifiers;
+    this.statusEffectModifiers = statusEffectModifiers;
   }
 }
 
@@ -54,7 +57,10 @@ export class Enemy {
     defense = 0,
     combatConditions = [],
     statusEffects = [],
-    modifiers = {},
+    statusEffectModifiers = {
+      attack: 0,
+      defense: 0,
+    },
   } = {}) {
     this.name = name;
 
@@ -70,7 +76,7 @@ export class Enemy {
     this.combatConditions = combatConditions;
 
     this.statusEffects = statusEffects;
-    this.modifiers = modifiers;
+    this.statusEffectModifiers = statusEffectModifiers;
   }
 
   determineEnemyMove(battle) {
@@ -131,198 +137,6 @@ export class Equipment {
     this.name = name;
     this.slot = slot;
     this.stats = stats;
-  }
-}
-
-export class Battle {
-  constructor({
-    party,
-    troop,
-    currentActor,
-    selectedAbility,
-    selectedTargets,
-    order,
-    battleState,
-  } = {}) {
-    this.party = party;
-    this.troop = troop;
-    this.selectedAbility = selectedAbility;
-    ((this.selectedTargets = selectedTargets),
-      (this.order = [...this.party.characters, ...this.troop.enemies]));
-    this.currentActor = this.order[0];
-    this.battleState = "active";
-  }
-
-  determineOrder() {
-    this.order = [...this.party.characters, ...this.troop.enemies];
-  }
-
-  changeActor() {
-    if (this.currentActor === this.order[this.order.length - 1]) {
-      this.currentActor = this.order[0];
-    } else
-      this.currentActor = this.order[this.order.indexOf(this.currentActor) + 1];
-  }
-
-  getAvailableAbilities() {
-    return this.currentActor.abilities;
-  }
-
-  getAvailableTargets() {
-    switch (this.selectedAbility.scope) {
-      default:
-        throw new Error(
-          `Unsupported targeting scope: ${this.selectedAbility.scope}`,
-        );
-      case "singleEnemy":
-        if (this.currentActor instanceof Character) {
-          return this.troop.enemies.filter((enemy) => enemy.health > 0);
-        } else {
-          return this.party.characters.filter(
-            (character) => character.health > 0,
-          );
-        }
-        break;
-      case "singleAlly":
-        if (this.currentActor instanceof Character) {
-          return this.party.characters.filter(
-            (character) => character.health > 0,
-          );
-        } else {
-          return this.troop.enemies.filter((enemy) => enemy.health > 0);
-        }
-        break;
-      case "allEnemies":
-        if (this.currentActor instanceof Character) {
-          return this.troop.enemies;
-        } else {
-          return this.party.characters;
-        }
-        break;
-      case "self":
-        return [this.currentActor];
-        break;
-    }
-  }
-
-  removeDeadActors() {
-    this.order = this.order.filter((actor) => actor.health > 0);
-  }
-
-  updateBattleState() {
-    if (this.party.characters.every((character) => character.health <= 0)) {
-      this.battleState = "lost";
-    } else if (this.troop.enemies.every((enemy) => enemy.health <= 0)) {
-      this.battleState = "won";
-    } else {
-      this.battleState = "active";
-    }
-  }
-
-  selectAbility(ability) {
-    this.selectedAbility = ability;
-  }
-
-  selectTargets(targets) {
-    this.selectedTargets = targets;
-  }
-}
-
-export class UI {
-  constructor() {
-    this.dialoguePanel = document.querySelector("#dialoguePanel");
-    this.characterPanel = document.querySelector("#characterPanel");
-    this.enemyPanel = document.querySelector("#enemyPanel");
-    this.actionPanel = document.querySelector("#actionPanel");
-
-    this.actionButtons = document.querySelectorAll(".actionButton");
-  }
-
-  changeDialogueText(text = "") {
-    this.dialoguePanel.innerHTML = text;
-  }
-
-  setAction(index, text) {
-    this.actionButtons[index].textContent = text;
-  }
-
-  createActionButton(text, callback) {
-    const button = document.createElement("button");
-
-    button.classList.add("actionButton");
-    button.textContent = text;
-
-    button.addEventListener("click", callback);
-
-    this.actionPanel.appendChild(button);
-  }
-
-  requestSelectedAbility(battle) {
-    let selectedAbility;
-    if (battle.currentActor instanceof Character) {
-      return new Promise((resolve) => {
-        this.actionPanel.innerHTML = "";
-        battle.getAvailableAbilities().forEach((ability) => {
-          this.createActionButton(ability.name, () => {
-            if (battle.currentActor.energy >= ability.energyCost) {
-              resolve(ability);
-            }
-          });
-        });
-      });
-    } else if (battle.currentActor instanceof Enemy) return;
-  }
-
-  requestSelectedTargets(battle) {
-    return new Promise((resolve) => {
-      this.actionPanel.innerHTML = "";
-      if (battle.selectedAbility.requiresTarget()) {
-        battle.getAvailableTargets().forEach((target) => {
-          this.createActionButton(target.name, () => {
-            resolve([target]);
-          });
-        });
-      } else {
-        resolve(battle.getAvailableTargets());
-      }
-    });
-  }
-
-  updateCharacterPanel(battle) {
-    this.characterPanel.innerHTML = "";
-
-    for (const character of battle.party.characters) {
-      const characterDiv = document.createElement("div");
-
-      const name = document.createElement("div");
-      name.textContent = character.name;
-
-      const health = document.createElement("div");
-      health.textContent = `HP: ${character.health}/${character.maxHealth}------`;
-
-      const energy = document.createElement("div");
-      energy.textContent = `Energy: ${character.energy}/${character.maxEnergy}--`;
-
-      characterDiv.append(name, health, energy);
-      this.characterPanel.append(characterDiv);
-    }
-  }
-
-  updateEnemyPanel(battle) {
-    this.enemyPanel.innerHTML = "";
-
-    for (const enemy of battle.troop.enemies) {
-      const enemyDiv = document.createElement("div");
-
-      const name = document.createElement("div");
-      name.textContent = enemy.name;
-
-      const health = document.createElement("div");
-      health.textContent = `HP: ${enemy.health}/${enemy.maxHealth}--`;
-
-      enemyDiv.append(name, health);
-      this.enemyPanel.append(enemyDiv);
-    }
   }
 }
 
@@ -393,9 +207,9 @@ export class DamageEffect extends Effect {
 
   calcDamage(user, target) {
     let damage = this.amount;
-
     if (user) {
       damage += user.attack;
+      damage += user.statusEffectModifiers.attack;
       damage -= target.defense;
     }
     return damage;
@@ -407,7 +221,7 @@ export class HealEffect extends Effect {
     super();
     this.amount = amount;
   }
-  execute({ user, targets = [] }) {
+  execute({ targets = [] }) {
     for (const target of targets) {
       target.health += this.amount;
       if (target.health > target.maxHealth) {
@@ -425,6 +239,18 @@ export class ApplyStatusEffect extends Effect {
   execute({ targets = [] }) {
     for (const target of targets) {
       this.effect.apply(target);
+    }
+  }
+}
+
+export class attackModifierEffect extends Effect {
+  constructor({ amount }) {
+    super();
+    this.amount = amount;
+  }
+  execute({ targets = [] }) {
+    for (const target of targets) {
+      target.statusEffectModifiers.attack += this.amount;
     }
   }
 }

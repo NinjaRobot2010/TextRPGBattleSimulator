@@ -1,3 +1,5 @@
+import { Character } from "./classes.js";
+
 export class UI {
   constructor() {
     this.dialoguePanel = document.querySelector("#dialoguePanel");

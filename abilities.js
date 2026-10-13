@@ -4,6 +4,7 @@ import {
   HealEffect,
   StatusEffect,
   ApplyStatusEffect,
+  attackModifierEffect,
 } from "./classes.js";
 
 export const punch = new Ability({
@@ -59,4 +60,17 @@ export const poisonDart = new Ability({
   energyCost: 10,
   scope: "singleEnemy",
   effects: [new ApplyStatusEffect({ effect: poison })],
+});
+
+export const rage = new StatusEffect({
+  name: "rage",
+  duration: 3,
+  effects: [new attackModifierEffect({ amount: 20 })],
+});
+
+export const enrage = new Ability({
+  name: "Enrage",
+  energyCost: 10,
+  scope: "self",
+  effects: [new ApplyStatusEffect({ effect: rage })],
 });

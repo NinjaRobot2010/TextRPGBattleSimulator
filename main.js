@@ -16,6 +16,7 @@ import {
   fireBall,
   holyWater,
   poisonDart,
+  enrage,
 } from "./abilities.js";
 
 import { Battle } from "./battle.js";
@@ -84,7 +85,7 @@ const heroParty = new Party({
       energy: 100,
       attack: 10,
       defense: 10,
-      abilities: [punch, holyWater],
+      abilities: [punch, holyWater, enrage],
     }),
     new Character({
       name: "Priest",
@@ -121,16 +122,6 @@ const currentBattle = new Battle({
 
 const currentBattleUI = new UI({ battle: currentBattle });
 
-const processStatusEffects = function (battle) {
-  for (const statusEffect of battle.currentActor.statusEffects) {
-    statusEffect.activate(battle);
-    statusEffect.duration -= 1;
-    if (statusEffect.duration <= 0) {
-      fruits.splice(battle.currentActor.statusEffects.indexOf(statusEffect), 1);
-    }
-  }
-};
-
 const determinePlayerMove = async function (battle, ui) {
   const ability = await ui.requestSelectedAbility(battle);
   battle.selectAbility(ability);
@@ -145,24 +136,18 @@ const determinePlayerMove = async function (battle, ui) {
   );
 };
 
-const checkIfDead = function (battle) {
-  if (battle.currentActor.health <= 0) {
-    battle.changeActor();
-  }
-};
-
 const playBattle = async function (battle, ui) {
   battle.determineOrder();
 
   while (battle.battleState === "active") {
-    processStatusEffects(battle);
-    checkIfDead(battle);
+    battle.clearStatusEffectModifiers();
+    battle.processStatusEffects();
+    battle.checkIfCurrentActorDead();
     if (battle.currentActor instanceof Character) {
       await determinePlayerMove(battle, ui);
     } else {
       battle.currentActor.determineEnemyMove(battle);
     }
-
     battle.removeDeadActors();
     battle.updateBattleState();
     ui.updateCharacterPanel(battle);
