@@ -122,42 +122,45 @@ const currentBattle = new Battle({
 
 const currentBattleUI = new UI({ battle: currentBattle });
 
-const determinePlayerMove = async function (battle, ui) {
+async function processActorMove(battle, ui) {
+  if (battle.currentActor instanceof Character) {
+    await processPlayerMove(battle, ui);
+  } else {
+    battle.currentActor.determineEnemyMove(battle);
+  }
+}
+
+const processPlayerMove = async function (battle, ui) {
   const ability = await ui.requestSelectedAbility(battle);
   battle.selectAbility(ability);
 
   const targets = await ui.requestSelectedTargets(battle);
   battle.selectTargets(targets);
 
-  battle.selectedAbility.use(battle.currentActor, battle.selectedTargets);
+  battle.executeSelectedMove();
 
-  ui.changeDialogueText(
-    `${battle.currentActor.name} uses ${battle.selectedAbility.name} on ${battle.selectedTargets[0].name}`,
-  );
+  ui.displayMove(battle);
 };
 
 const playBattle = async function (battle, ui) {
+  ui.updateCharacterPanel(currentBattle);
+  ui.updateEnemyPanel(currentBattle);
+  ui.changeDialogueText("Enemies attacked you!");
+
   battle.determineOrder();
 
   while (battle.battleState === "active") {
     battle.clearStatusEffectModifiers();
     battle.processStatusEffects();
     battle.checkIfCurrentActorDead();
-    if (battle.currentActor instanceof Character) {
-      await determinePlayerMove(battle, ui);
-    } else {
-      battle.currentActor.determineEnemyMove(battle);
-    }
+    await processActorMove(battle, ui);
     battle.removeDeadActors();
     battle.updateBattleState();
     ui.updateCharacterPanel(battle);
     ui.updateEnemyPanel(battle);
 
-    if (battle.battleState === "won") {
-      ui.changeDialogueText("You Won!");
-      break;
-    } else if (battle.battleState === "lost") {
-      ui.changeDialogueText("You Lost...");
+    if (battle.battleState !== "active") {
+      ui.displayBattleResult();
       break;
     }
 
@@ -165,7 +168,4 @@ const playBattle = async function (battle, ui) {
   }
 };
 
-currentBattleUI.updateCharacterPanel(currentBattle);
-currentBattleUI.updateEnemyPanel(currentBattle);
-currentBattleUI.changeDialogueText("Zombies attacked you!");
 playBattle(currentBattle, currentBattleUI);

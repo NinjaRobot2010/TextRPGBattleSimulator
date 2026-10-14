@@ -93,6 +93,10 @@ export class Battle {
     this.selectedTargets = targets;
   }
 
+  executeSelectedMove() {
+    this.selectedAbility.use(this.currentActor, this.selectedTargets);
+  }
+
   clearStatusEffectModifiers() {
     for (let key of Object.keys(this.currentActor.statusEffectModifiers)) {
       this.currentActor.statusEffectModifiers[key] = 0;
