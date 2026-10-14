@@ -65,7 +65,7 @@ export class UI {
 
     for (const character of battle.party.characters) {
       const characterDiv = document.createElement("div");
-      characterDiv.classList.add('character__container')
+      characterDiv.classList.add("character__container");
 
       const name = document.createElement("div");
       name.textContent = character.name;
@@ -83,11 +83,10 @@ export class UI {
 
   updateEnemyPanel(battle) {
     this.enemyPanel.innerHTML = "";
-    
 
     for (const enemy of battle.troop.enemies) {
       const enemyDiv = document.createElement("div");
-      enemyDiv.classList.add('enemy__container');
+      enemyDiv.classList.add("enemy__container");
 
       const name = document.createElement("div");
       name.textContent = enemy.name;
@@ -97,6 +96,19 @@ export class UI {
 
       enemyDiv.append(name, health);
       this.enemyPanel.append(enemyDiv);
+    }
+  }
+
+  displayMove(battle) {
+    this.changeDialogueText(
+      `${battle.currentActor.name} uses ${battle.selectedAbility.name} on ${battle.selectedTargets[0].name}`,
+    );
+  }
+  displayBattleResult(battle) {
+    if (battle.battleState === "won") {
+      this.changeDialogueText("You Won!");
+    } else if (battle.battleState === "lost") {
+      this.changeDialogueText("You Lost...");
     }
   }
 }
