@@ -65,15 +65,16 @@ export class UI {
 
     for (const character of battle.party.characters) {
       const characterDiv = document.createElement("div");
+      characterDiv.classList.add('character__container')
 
       const name = document.createElement("div");
       name.textContent = character.name;
 
       const health = document.createElement("div");
-      health.textContent = `HP: ${character.health}/${character.maxHealth}------`;
+      health.textContent = `HP: ${character.health}/${character.maxHealth}`;
 
       const energy = document.createElement("div");
-      energy.textContent = `Energy: ${character.energy}/${character.maxEnergy}--`;
+      energy.textContent = `Energy: ${character.energy}/${character.maxEnergy}`;
 
       characterDiv.append(name, health, energy);
       this.characterPanel.append(characterDiv);
@@ -82,15 +83,17 @@ export class UI {
 
   updateEnemyPanel(battle) {
     this.enemyPanel.innerHTML = "";
+    
 
     for (const enemy of battle.troop.enemies) {
       const enemyDiv = document.createElement("div");
+      enemyDiv.classList.add('enemy__container');
 
       const name = document.createElement("div");
       name.textContent = enemy.name;
 
       const health = document.createElement("div");
-      health.textContent = `HP: ${enemy.health}/${enemy.maxHealth}--`;
+      health.textContent = `HP: ${enemy.health}/${enemy.maxHealth}`;
 
       enemyDiv.append(name, health);
       this.enemyPanel.append(enemyDiv);
