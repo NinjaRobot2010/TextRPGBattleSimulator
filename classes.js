@@ -83,6 +83,7 @@ export class Enemy {
     for (const combatCondition of this.combatConditions) {
       if (combatCondition.condition({ battle: battle })) {
         const targets = combatCondition.targetingSystem(battle);
+        battle.selectTargets(targets);
         combatCondition.move.use(this, targets);
         return;
       }

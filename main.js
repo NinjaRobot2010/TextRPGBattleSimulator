@@ -122,11 +122,16 @@ const currentBattle = new Battle({
 
 const currentBattleUI = new UI({ battle: currentBattle });
 
+export const delay = function (ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 async function processActorMove(battle, ui) {
   if (battle.currentActor instanceof Character) {
     await processPlayerMove(battle, ui);
   } else {
     battle.currentActor.determineEnemyMove(battle);
+    ui.displayMove(battle);
   }
 }
 
@@ -143,8 +148,8 @@ const processPlayerMove = async function (battle, ui) {
 };
 
 const playBattle = async function (battle, ui) {
-  ui.updateCharacterPanel(currentBattle);
-  ui.updateEnemyPanel(currentBattle);
+  ui.updateCharacterPanel(battle);
+  ui.updateEnemyPanel(battle);
   ui.changeDialogueText("Enemies attacked you!");
 
   battle.determineOrder();
@@ -156,8 +161,8 @@ const playBattle = async function (battle, ui) {
     await processActorMove(battle, ui);
     battle.removeDeadActors();
     battle.updateBattleState();
-    ui.updateCharacterPanel(battle);
-    ui.updateEnemyPanel(battle);
+    ui.clearActionPanel();
+    await delay(1700);
 
     if (battle.battleState !== "active") {
       ui.displayBattleResult();
@@ -165,6 +170,8 @@ const playBattle = async function (battle, ui) {
     }
 
     battle.changeActor();
+    ui.updateCharacterPanel(battle);
+    ui.updateEnemyPanel(battle);
   }
 };
 

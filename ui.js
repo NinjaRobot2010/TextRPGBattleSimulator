@@ -1,4 +1,5 @@
 import { Character } from "./classes.js";
+import { delay } from "./main.js";
 
 export class UI {
   constructor() {
@@ -10,8 +11,13 @@ export class UI {
     this.actionButtons = document.querySelectorAll(".actionButton");
   }
 
-  changeDialogueText(text = "") {
-    this.dialoguePanel.innerHTML = text;
+  async changeDialogueText(text = "") {
+    this.dialoguePanel.textContent = "";
+
+    for (const letter of text) {
+      this.dialoguePanel.textContent += letter;
+      await delay(40);
+    }
   }
 
   setAction(index, text) {
@@ -29,11 +35,15 @@ export class UI {
     this.actionPanel.appendChild(button);
   }
 
+  clearActionPanel() {
+    this.actionPanel.innerHTML = "";
+  }
+
   requestSelectedAbility(battle) {
     let selectedAbility;
     if (battle.currentActor instanceof Character) {
       return new Promise((resolve) => {
-        this.actionPanel.innerHTML = "";
+        this.clearActionPanel();
         battle.getAvailableAbilities().forEach((ability) => {
           this.createActionButton(ability.name, () => {
             if (battle.currentActor.energy >= ability.energyCost) {
@@ -69,6 +79,9 @@ export class UI {
 
       const name = document.createElement("div");
       name.textContent = character.name;
+      if (battle.currentActor === character) {
+        name.style.color = "yellow";
+      }
 
       const health = document.createElement("div");
       health.textContent = `HP: ${character.health}/${character.maxHealth}`;
@@ -90,6 +103,9 @@ export class UI {
 
       const name = document.createElement("div");
       name.textContent = enemy.name;
+      if (battle.currentActor === enemy) {
+        name.style.color = "yellow";
+      }
 
       const health = document.createElement("div");
       health.textContent = `HP: ${enemy.health}/${enemy.maxHealth}`;
