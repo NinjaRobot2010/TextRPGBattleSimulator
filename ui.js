@@ -39,6 +39,18 @@ export class UI {
     this.actionPanel.innerHTML = "";
   }
 
+  requestSelectedActionType() {
+    return new Promise((resolve) => {
+      this.clearActionPanel();
+      this.createActionButton("Abilities", () => {
+        resolve("ability");
+      });
+      this.createActionButton("Items", () => {
+        resolve("item");
+      });
+    });
+  }
+
   requestSelectedAbility(battle) {
     let selectedAbility;
     if (battle.currentActor instanceof Character) {
@@ -67,6 +79,18 @@ export class UI {
       } else {
         resolve(battle.getAvailableTargets());
       }
+    });
+  }
+
+  requestSelectedItem(battle) {
+    return new Promise((resolve) => {
+      this.clearActionPanel();
+      battle.party.items.forEach((item) => {
+        this.createActionButton(item.name, () => {
+          console.log(item);
+          resolve(item);
+        });
+      });
     });
   }
 
@@ -115,11 +139,18 @@ export class UI {
     }
   }
 
-  displayMove(battle) {
+  displayAbilityMove(battle) {
     this.changeDialogueText(
       `${battle.currentActor.name} uses ${battle.selectedAbility.name} on ${battle.selectedTargets[0].name}`,
     );
   }
+
+  displayItemMove(battle) {
+    this.changeDialogueText(
+      `${battle.currentActor.name} uses ${battle.selectedItem.name}`,
+    );
+  }
+
   displayBattleResult(battle) {
     if (battle.battleState === "won") {
       this.changeDialogueText("You Won!");
