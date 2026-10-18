@@ -9,6 +9,7 @@ import {
   Consumable,
   Equipment,
   HealEffect,
+  ApplyStatusEffect,
 } from "./classes.js";
 
 import {
@@ -20,6 +21,7 @@ import {
   holyWater,
   poisonDart,
   enrage,
+  strength,
 } from "./abilities.js";
 
 import { Battle } from "./battle.js";
@@ -83,6 +85,11 @@ const healthPotion = new Consumable({
   effects: [new HealEffect({ amount: 50 })],
 });
 
+const strengthPotion = new Consumable({
+  name: "Strength Potion",
+  effects: [new ApplyStatusEffect({ effect: strength })],
+});
+
 const heroParty = new Party({
   characters: [
     new Character({
@@ -112,7 +119,7 @@ const heroParty = new Party({
       abilities: [punch, fireBall],
     }),
   ],
-  items: [healthPotion],
+  items: [healthPotion, healthPotion, strengthPotion],
 });
 
 const zombieTroop = new Troop({
@@ -160,7 +167,7 @@ const processPlayerMove = async function (battle, ui) {
     const item = await ui.requestSelectedItem(battle);
     battle.selectItem(item);
     battle.useSelectedItem();
-    battle.removeSelectedItem();
+    battle.removeSelectedItem(item);
     ui.displayItemMove(battle);
   }
 };

@@ -68,6 +68,12 @@ export const rage = new StatusEffect({
   effects: [new attackModifierEffect({ amount: 20 })],
 });
 
+export const strength = new StatusEffect({
+  name: "strength",
+  duration: 2,
+  effects: [new attackModifierEffect({ amount: 30 })],
+});
+
 export const enrage = new Ability({
   name: "Enrage",
   energyCost: 10,

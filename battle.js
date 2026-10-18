@@ -106,8 +106,8 @@ export class Battle {
     this.selectedItem.use([this.currentActor]);
   }
 
-  removeSelectedItem(item) {
-    this.party.items.splice(this.party.items.indexOf(item), 1);
+  removeSelectedItem() {
+    this.party.items.splice(this.party.items.indexOf(this.selectedItem), 1);
   }
 
   clearStatusEffectModifiers() {
