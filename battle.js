@@ -17,6 +17,7 @@ export class Battle {
       (this.order = [...this.party.characters, ...this.troop.enemies]));
     this.currentActor = this.order[0];
     this.battleState = "active";
+    this.selectedItem;
   }
 
   determineOrder() {
@@ -93,8 +94,20 @@ export class Battle {
     this.selectedTargets = targets;
   }
 
-  executeSelectedMove() {
+  selectItem(item) {
+    this.selectedItem = item;
+  }
+
+  executeSelectedAbility() {
     this.selectedAbility.use(this.currentActor, this.selectedTargets);
+  }
+
+  useSelectedItem() {
+    this.selectedItem.use([this.currentActor]);
+  }
+
+  removeSelectedItem() {
+    this.party.items.splice(this.party.items.indexOf(this.selectedItem), 1);
   }
 
   clearStatusEffectModifiers() {

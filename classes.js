@@ -82,6 +82,7 @@ export class Enemy {
   determineEnemyMove(battle) {
     for (const combatCondition of this.combatConditions) {
       if (combatCondition.condition({ battle: battle })) {
+        battle.selectAbility(combatCondition.move);
         const targets = combatCondition.targetingSystem(battle);
         battle.selectTargets(targets);
         combatCondition.move.use(this, targets);
@@ -127,15 +128,27 @@ export class Troop {
 }
 
 export class Item {
-  constructor({ name = "", equipmentStats = {} } = {}) {
+  constructor({ name = "" } = {}) {
     this.name = name;
-    this.equipmentStats = equipmentStats;
   }
 }
 
-export class Equipment {
+export class Consumable extends Item {
+  constructor({ name = "", effects = [] } = {}) {
+    super({ name });
+    this.effects = effects;
+  }
+
+  use(targets = []) {
+    for (const effect of this.effects) {
+      effect.execute({ targets });
+    }
+  }
+}
+
+export class Equipment extends Item {
   constructor({ name = "", slot = "", stats = {} } = {}) {
-    this.name = name;
+    super({ name });
     this.slot = slot;
     this.stats = stats;
   }
@@ -156,7 +169,6 @@ export class Ability {
 
       for (const effect of this.effects) {
         effect.execute({ user, targets });
-        console.log(`${user.name} uses ability `);
       }
     }
   }

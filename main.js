@@ -6,6 +6,10 @@ import {
   CombatCondition,
   targetingSystems,
   conditionSystems,
+  Consumable,
+  Equipment,
+  HealEffect,
+  ApplyStatusEffect,
 } from "./classes.js";
 
 import {
@@ -17,12 +21,13 @@ import {
   holyWater,
   poisonDart,
   enrage,
+  strength,
 } from "./abilities.js";
 
 import { Battle } from "./battle.js";
 import { UI } from "./ui.js";
 
-export class Zombie extends Enemy {
+class Zombie extends Enemy {
   constructor({
     name = "Zombie",
     maxHealth = 100,
@@ -46,7 +51,7 @@ export class Zombie extends Enemy {
   }
 }
 
-export class DarkMage extends Enemy {
+class DarkMage extends Enemy {
   constructor({
     name = "Dark Mage",
     maxHealth = 100,
@@ -74,6 +79,16 @@ export class DarkMage extends Enemy {
     });
   }
 }
+
+const healthPotion = new Consumable({
+  name: "Health Potion",
+  effects: [new HealEffect({ amount: 50 })],
+});
+
+const strengthPotion = new Consumable({
+  name: "Strength Potion",
+  effects: [new ApplyStatusEffect({ effect: strength })],
+});
 
 const heroParty = new Party({
   characters: [
@@ -104,6 +119,7 @@ const heroParty = new Party({
       abilities: [punch, fireBall],
     }),
   ],
+  items: [healthPotion, healthPotion, strengthPotion],
 });
 
 const zombieTroop = new Troop({
@@ -131,20 +147,29 @@ async function processActorMove(battle, ui) {
     await processPlayerMove(battle, ui);
   } else {
     battle.currentActor.determineEnemyMove(battle);
-    ui.displayMove(battle);
+    ui.displayAbilityMove(battle);
   }
 }
 
 const processPlayerMove = async function (battle, ui) {
-  const ability = await ui.requestSelectedAbility(battle);
-  battle.selectAbility(ability);
+  let selectedActionType = await ui.requestSelectedActionType();
+  if (selectedActionType === "ability") {
+    const ability = await ui.requestSelectedAbility(battle);
+    battle.selectAbility(ability);
 
-  const targets = await ui.requestSelectedTargets(battle);
-  battle.selectTargets(targets);
+    const targets = await ui.requestSelectedTargets(battle);
+    battle.selectTargets(targets);
 
-  battle.executeSelectedMove();
+    battle.executeSelectedAbility();
 
-  ui.displayMove(battle);
+    ui.displayAbilityMove(battle);
+  } else if (selectedActionType === "item") {
+    const item = await ui.requestSelectedItem(battle);
+    battle.selectItem(item);
+    battle.useSelectedItem();
+    battle.removeSelectedItem(item);
+    ui.displayItemMove(battle);
+  }
 };
 
 const playBattle = async function (battle, ui) {
