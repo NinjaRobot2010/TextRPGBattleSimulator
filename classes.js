@@ -12,7 +12,10 @@ export class Character {
     maxHealth = 0,
     maxEnergy = 0,
     abilities = [],
-    equipment = [],
+    equipment = {
+      armor: "",
+      weapon: "",
+    },
     attack = 0,
     defense = 0,
     statusEffects = [],
@@ -37,6 +40,30 @@ export class Character {
 
     this.statusEffects = statusEffects;
     this.statusEffectModifiers = statusEffectModifiers;
+
+    this.equipmentModifiers = {
+      attack: 0,
+      defense: 0,
+    };
+  }
+
+  calcEquipmentModifiers() {
+    this.equipmentModifiers = {
+      attack: 0,
+      defense: 0,
+    };
+
+    for (const equipment of Object.values(this.equipment)) {
+      if (!equipment) continue;
+
+      for (const [key, value] of Object.entries(equipment.stats)) {
+        this.equipmentModifiers[key] += value;
+      }
+    }
+  }
+
+  equipEquipment(item) {
+    this.equipment[item.slot] = item;
   }
 }
 
@@ -147,7 +174,14 @@ export class Consumable extends Item {
 }
 
 export class Equipment extends Item {
-  constructor({ name = "", slot = "", stats = {} } = {}) {
+  constructor({
+    name = "",
+    slot = "",
+    stats = {
+      attack: 0,
+      defense: 0,
+    },
+  } = {}) {
     super({ name });
     this.slot = slot;
     this.stats = stats;
@@ -224,6 +258,13 @@ export class DamageEffect extends Effect {
       damage += user.attack;
       damage += user.statusEffectModifiers.attack;
       damage -= target.defense;
+
+      if (user instanceof Character) {
+        damage += user.equipmentModifiers.attack;
+      }
+      if (target instanceof Character) {
+        damage -= target.equipmentModifiers.defense;
+      }
     }
     return damage;
   }

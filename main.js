@@ -90,6 +90,21 @@ const strengthPotion = new Consumable({
   effects: [new ApplyStatusEffect({ effect: strength })],
 });
 
+const bronzeSword = new Equipment({
+  name: "Bronze Sword",
+  slot: "weapon",
+  stats: {
+    attack: 5,
+  },
+});
+const plateArmor = new Equipment({
+  name: "Plate Armor",
+  slot: "armor",
+  stats: {
+    defense: 5,
+  },
+});
+
 const heroParty = new Party({
   characters: [
     new Character({
@@ -178,7 +193,7 @@ const playBattle = async function (battle, ui) {
   ui.changeDialogueText("Enemies attacked you!");
 
   battle.determineOrder();
-
+  battle.calcEquipmentModifiers();
   while (battle.battleState === "active") {
     battle.clearStatusEffectModifiers();
     battle.processStatusEffects();
@@ -200,4 +215,6 @@ const playBattle = async function (battle, ui) {
   }
 };
 
+heroParty.characters[0].equipEquipment(bronzeSword);
+heroParty.characters[0].equipEquipment(plateArmor);
 playBattle(currentBattle, currentBattleUI);
