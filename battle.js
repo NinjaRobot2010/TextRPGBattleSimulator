@@ -24,6 +24,12 @@ export class Battle {
     this.order = [...this.party.characters, ...this.troop.enemies];
   }
 
+  calcEquipmentModifiers() {
+    for (let character of this.party.characters) {
+      character.calcEquipmentModifiers();
+    }
+  }
+
   changeActor() {
     if (this.currentActor === this.order[this.order.length - 1]) {
       this.currentActor = this.order[0];
