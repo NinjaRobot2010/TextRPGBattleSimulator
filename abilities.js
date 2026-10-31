@@ -5,7 +5,7 @@ import {
   StatusEffect,
   ApplyStatusEffect,
   attackModifierEffect,
-} from "./classes.js";
+} from "./abilityClasses.js";
 
 export const punch = new Ability({
   name: "Punch",
